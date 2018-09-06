@@ -11,7 +11,8 @@ import router from './router'
 import Router from './router/Router.vue'
 
 window.VUE_DEVTOOLS_CONFIG = {
-  openInEditorHost: '/'
+  openInEditorHost: '/',
+  document, Vue, store
 }
 
 const items = []

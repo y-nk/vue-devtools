@@ -11,10 +11,14 @@ Vue.use(Vuex)
 
 const store = new Vuex.Store({
   state: {
+    documents: [],
     message: '',
     view: 'vertical'
   },
   mutations: {
+    UPDATE_DOCUMENTS (state, documents) {
+      state.documents = documents
+    },
     SHOW_MESSAGE (state, message) {
       state.message = message
     },

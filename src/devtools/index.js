@@ -135,6 +135,10 @@ function initApp (shell) {
       store.commit('components/TOGGLE_INSTANCE', parse(payload))
     })
 
+    bridge.on('documents:update', payload => {
+      store.commit('UPDATE_DOCUMENTS', payload)
+    })
+
     bridge.on('vuex:init', snapshot => {
       store.commit('vuex/INIT', snapshot)
     })

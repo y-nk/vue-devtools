@@ -45,6 +45,10 @@
           class="primary inline"
           indicator
         >
+          <select v-if="documents && documents.length > 1" v-model="document">
+            <option :key="index" v-for="(item, index) in documents" :value="item.id">{{ item.url }}</option>
+          </select>
+
           <VueGroupButton
             v-tooltip="$t('App.components.tooltip')"
             :class="{
@@ -217,6 +221,7 @@ export default {
 
   data () {
     return {
+      document: null,
       isRouterGroupOpen: false,
       routingTabs: [
         { name: 'router', label: 'History', icon: 'directions' },
@@ -227,6 +232,7 @@ export default {
 
   computed: {
     ...mapState({
+      documents: state => state.documents,
       message: state => state.message,
       newEventCount: state => state.events.newEventCount,
       view: state => state.view
@@ -250,7 +256,17 @@ export default {
       if (tab === 'events') {
         this.$store.commit('events/RESET_NEW_EVENT_COUNT')
       }
-    }
+    },
+
+    document (id) {
+      bridge.send('switch-document', id)
+    },
+
+    documents (documents) {
+      if (this.document === null) {
+        this.document = documents[0].id
+      }
+    },
   },
 
   mounted () {

@@ -34,14 +34,15 @@ export function initVuexBackend (hook, bridge) {
   }
 
   reset()
-
   bridge.send('vuex:init', baseSnapshot)
 
   // deal with multiple backend injections
   hook.off('vuex:mutation')
+  hook.off('vuex:mutation-patch')
 
   // application -> devtool
-  hook.on('vuex:mutation', ({ type, payload }) => {
+  hook.on('vuex:mutation-patch', wrapper => {
+    const { type, payload } = wrapper
     if (!SharedData.recordVuex) return
 
     const index = mutations.length
@@ -210,5 +211,23 @@ export function getCustomStoreDetails (store) {
         abstract: true
       }
     }
+  }
+}
+
+export function addMissingVueXListeners (hook) {
+  hook.off('vuex:travel-to-state')
+  hook.on('vuex:travel-to-state', function (targetState) {
+    hook.store.replaceState(targetState);
+  });
+
+  if (!hook.store.__devtool_patch__) {
+    const store = hook.store;
+    hook.store.subscribe(function (mutation, state) {
+      if (hook.store === store) {
+        hook.emit('vuex:mutation-patch', mutation, state);
+      }
+    });
+
+    hook.store.__devtool_patch__ = true;
   }
 }

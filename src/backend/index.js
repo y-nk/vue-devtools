@@ -2,7 +2,7 @@
 // when the Vue Devtools panel is activated.
 
 import { highlight, unHighlight, getInstanceOrVnodeRect, getInstanceOwnerDocument } from './highlighter'
-import { initVuexBackend } from './vuex'
+import { initVuexBackend, addMissingVueXListeners } from './vuex'
 import { initEventsBackend } from './events'
 import { initRouterBackend } from './router'
 import { initPerfBackend } from './perf'
@@ -51,7 +51,14 @@ function connect (Vue) {
     documentSelector.setCurrentDocumentById(id)
     scan(documentSelector.getCurrentDocument())
 
+    // defaultView would be the current window where the VUE_DEVTOOLS_CONFIG has the instances
+    hook.Vue = documentSelector.getCurrentDocument().defaultView.VUE_DEVTOOLS_CONFIG.Vue
+    hook.store = documentSelector.getCurrentDocument().defaultView.VUE_DEVTOOLS_CONFIG.store
+
     new ComponentSelector(bridge, documentSelector.getCurrentDocument(), instanceMap)
+
+    initVuexBackend(hook, bridge)
+    addMissingVueXListeners(hook)
   })
 
   hook.currentTab = 'components'
@@ -130,9 +137,11 @@ function connect (Vue) {
   // vuex
   if (hook.store) {
     initVuexBackend(hook, bridge)
+    addMissingVueXListeners(hook)
   } else {
     hook.once('vuex:init', store => {
       initVuexBackend(hook, bridge)
+      addMissingVueXListeners(hook)
     })
   }
 
@@ -141,7 +150,7 @@ function connect (Vue) {
   })
 
   // events
-  initEventsBackend(Vue, bridge)
+  //initEventsBackend(Vue, bridge)
 
   window.__VUE_DEVTOOLS_INSPECT__ = inspectInstance
 

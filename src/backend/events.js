@@ -3,7 +3,7 @@ import { getInstanceName } from './index'
 
 const internalRE = /^(?:pre-)?hook:/
 
-export function initEventsBackend (Vue, bridge) {
+export function initEventsBackend (hook, bridge) {
   let recording = true
 
   bridge.send('events:reset')
@@ -30,11 +30,12 @@ export function initEventsBackend (Vue, bridge) {
   }
 
   function wrap (method) {
-    const original = Vue.prototype[method]
+    const original = hook.Vue.prototype[method]
     if (original) {
-      Vue.prototype[method] = function (...args) {
+      const Vue = hook.Vue;
+      hook.Vue.prototype[method] = function (...args) {
         const res = original.apply(this, args)
-        if (recording) {
+        if (hook.Vue === Vue && recording) {
           logEvent(this, method, args[0], args.slice(1))
         }
         return res
@@ -42,7 +43,11 @@ export function initEventsBackend (Vue, bridge) {
     }
   }
 
-  wrap('$emit')
-  wrap('$broadcast')
-  wrap('$dispatch')
+  if (!hook.Vue.__devtool_patch__) {
+    wrap('$emit')
+    wrap('$broadcast')
+    wrap('$dispatch')
+
+    hook.Vue.__devtool_patch__ = true;
+  }
 }

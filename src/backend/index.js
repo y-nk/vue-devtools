@@ -59,6 +59,8 @@ function connect (Vue) {
 
     initVuexBackend(hook, bridge)
     addMissingVueXListeners(hook)
+
+    initEventsBackend(hook, bridge)
   })
 
   hook.currentTab = 'components'
@@ -150,7 +152,7 @@ function connect (Vue) {
   })
 
   // events
-  //initEventsBackend(Vue, bridge)
+  initEventsBackend(hook, bridge)
 
   window.__VUE_DEVTOOLS_INSPECT__ = inspectInstance
 

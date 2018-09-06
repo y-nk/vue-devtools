@@ -1,6 +1,6 @@
 import { stringify } from '../util'
 
-export function initRouterBackend (Vue, bridge, rootInstances) {
+export function initRouterBackend (hook, bridge, rootInstances) {
   let recording = true
 
   const getSnapshot = () => {
@@ -22,12 +22,13 @@ export function initRouterBackend (Vue, bridge, rootInstances) {
     recording = enabled
   })
 
+  const Vue = hook.Vue;
   rootInstances.forEach(instance => {
     const router = instance._router
 
-    if (router) {
+    if (router && !router.__devtools_patch__) {
       router.afterEach((to, from) => {
-        if (!recording) return
+        if (hook.Vue !== Vue || !recording) return
         bridge.send('router:changed', stringify({
           to,
           from,
@@ -52,6 +53,7 @@ export function initRouterBackend (Vue, bridge, rootInstances) {
           addRoutes.call(this, routes)
         }
       }
+      router.__devtools_patch__ = true;
     }
   })
 }

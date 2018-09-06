@@ -60,6 +60,8 @@ function connect (Vue) {
     initVuexBackend(hook, bridge)
     addMissingVueXListeners(hook)
 
+    initRouterBackend(hook, bridge, rootInstances)
+
     initEventsBackend(hook, bridge)
   })
 
@@ -148,7 +150,7 @@ function connect (Vue) {
   }
 
   hook.once('router:init', () => {
-    initRouterBackend(hook.Vue, bridge, rootInstances)
+    initRouterBackend(hook, bridge, rootInstances)
   })
 
   // events

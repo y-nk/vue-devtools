@@ -1,7 +1,7 @@
 // This is the backend that is injected into the page that a Vue app lives in
 // when the Vue Devtools panel is activated.
 
-import { highlight, unHighlight, getInstanceOrVnodeRect } from './highlighter'
+import { highlight, unHighlight, getInstanceOrVnodeRect, getInstanceOwnerDocument } from './highlighter'
 import { initVuexBackend } from './vuex'
 import { initEventsBackend } from './events'
 import { initRouterBackend } from './router'
@@ -50,6 +50,8 @@ function connect (Vue) {
   bridge.on('switch-document', id => {
     documentSelector.setCurrentDocumentById(id)
     scan(documentSelector.getCurrentDocument())
+
+    new ComponentSelector(bridge, documentSelector.getCurrentDocument(), instanceMap)
   })
 
   hook.currentTab = 'components'
@@ -101,7 +103,7 @@ function connect (Vue) {
   const documentSelector = new DocumentSelector(bridge)
 
   // eslint-disable-next-line no-new
-  new ComponentSelector(bridge, instanceMap)
+  new ComponentSelector(bridge, documentSelector.getCurrentDocument(), instanceMap)
 
   // Get the instance id that is targeted by context menu
   bridge.on('get-context-menu-target', () => {
@@ -836,8 +838,12 @@ function processObservables (instance) {
 
 function scrollIntoView (instance) {
   const rect = getInstanceOrVnodeRect(instance)
+  const ownerDocument = getInstanceOwnerDocument(instance)
+
   if (rect) {
-    window.scrollBy(0, rect.top + (rect.height - window.innerHeight) / 2)
+    ownerDocument.scrollingElement.scrollBy(
+      0, rect.top + (rect.height - ownerDocument.scrollingElement.clientHeight) / 2
+    )
   }
 }
 

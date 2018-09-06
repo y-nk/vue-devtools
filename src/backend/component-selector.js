@@ -2,9 +2,10 @@ import { highlight, unHighlight } from './highlighter'
 import { findRelatedComponent } from './utils'
 
 export default class ComponentSelector {
-  constructor (bridge, instanceMap) {
+  constructor (bridge, document, instanceMap) {
     const self = this
     self.bridge = bridge
+    self.document = document
     self.instanceMap = instanceMap
     self.bindMethods()
 
@@ -16,26 +17,26 @@ export default class ComponentSelector {
    * Adds event listeners for mouseover and mouseup
    */
   startSelecting () {
-    document.body.addEventListener('mouseover', this.elementMouseOver, true)
-    document.body.addEventListener('click', this.elementClicked, true)
-    document.body.addEventListener('mouseout', this.cancelEvent, true)
-    document.body.addEventListener('mouseenter', this.cancelEvent, true)
-    document.body.addEventListener('mouseleave', this.cancelEvent, true)
-    document.body.addEventListener('mousedown', this.cancelEvent, true)
-    document.body.addEventListener('mouseup', this.cancelEvent, true)
+    this.document.body.addEventListener('mouseover', this.elementMouseOver, true)
+    this.document.body.addEventListener('click', this.elementClicked, true)
+    this.document.body.addEventListener('mouseout', this.cancelEvent, true)
+    this.document.body.addEventListener('mouseenter', this.cancelEvent, true)
+    this.document.body.addEventListener('mouseleave', this.cancelEvent, true)
+    this.document.body.addEventListener('mousedown', this.cancelEvent, true)
+    this.document.body.addEventListener('mouseup', this.cancelEvent, true)
   }
 
   /**
    * Removes event listeners
    */
   stopSelecting () {
-    document.body.removeEventListener('mouseover', this.elementMouseOver, true)
-    document.body.removeEventListener('click', this.elementClicked, true)
-    document.body.removeEventListener('mouseout', this.cancelEvent, true)
-    document.body.removeEventListener('mouseenter', this.cancelEvent, true)
-    document.body.removeEventListener('mouseleave', this.cancelEvent, true)
-    document.body.removeEventListener('mousedown', this.cancelEvent, true)
-    document.body.removeEventListener('mouseup', this.cancelEvent, true)
+    this.document.body.removeEventListener('mouseover', this.elementMouseOver, true)
+    this.document.body.removeEventListener('click', this.elementClicked, true)
+    this.document.body.removeEventListener('mouseout', this.cancelEvent, true)
+    this.document.body.removeEventListener('mouseenter', this.cancelEvent, true)
+    this.document.body.removeEventListener('mouseleave', this.cancelEvent, true)
+    this.document.body.removeEventListener('mousedown', this.cancelEvent, true)
+    this.document.body.removeEventListener('mouseup', this.cancelEvent, true)
 
     unHighlight()
   }

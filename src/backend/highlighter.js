@@ -34,7 +34,12 @@ export function highlight (instance) {
     let name = instance.fnContext ? getComponentName(instance.fnOptions) : getInstanceName(instance)
     if (SharedData.classifyComponents) name = classify(name)
     if (name) content = `<span style="opacity: .6;">&lt;</span>${name}<span style="opacity: .6;">&gt;</span>`
-    showOverlay(rect, content)
+
+    const ownerDocument = getInstanceOwnerDocument(instance)
+
+    if (ownerDocument) {
+      showOverlay(rect, content, ownerDocument)
+    }
   }
 }
 
@@ -44,7 +49,7 @@ export function highlight (instance) {
 
 export function unHighlight () {
   if (overlay.parentNode) {
-    document.body.removeChild(overlay)
+    overlay.parentNode.removeChild(overlay)
   }
 }
 
@@ -65,6 +70,22 @@ export function getInstanceOrVnodeRect (instance) {
   } else if (el.nodeType === 1) {
     return el.getBoundingClientRect()
   }
+}
+
+/**
+ * Get the owner document for an instance.
+ *
+ * @param {Vue} instance
+ * @return {Object}
+ */
+
+export function getInstanceOwnerDocument (instance) {
+  const el = instance.$el || instance.elm
+  if (!inDoc(el)) {
+    return
+  }
+
+  return el.ownerDocument
 }
 
 /**
@@ -126,7 +147,7 @@ function getTextRect (node) {
  * @param {Rect}
  */
 
-function showOverlay ({ width = 0, height = 0, top = 0, left = 0 }, content = '') {
+function showOverlay ({ width = 0, height = 0, top = 0, left = 0 }, content = '', document) {
   overlay.style.width = ~~width + 'px'
   overlay.style.height = ~~height + 'px'
   overlay.style.top = ~~top + 'px'

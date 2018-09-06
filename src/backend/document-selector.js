@@ -31,8 +31,9 @@ export default class DocumentSelector {
     const iframes = Array.from(this.currentDocument.getElementsByTagName('iframe'))
 
     const newDocuments = iframes
-      .filter(iframe => typeof iframe.contentDocument.__VUE_DEVTOOLS_DOCUMENT_ID__ === 'undefined')
       .map(iframe => iframe.contentDocument)
+      .filter(document => document.defaultView.hasOwnProperty('VUE_DEVTOOLS_CONFIG'))
+      .filter(document => this.availableDocuments.indexOf(document) === -1);
 
     newDocuments.forEach(document => {
       document.__VUE_DEVTOOLS_DOCUMENT_ID__ = ++id

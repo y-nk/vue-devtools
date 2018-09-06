@@ -9,6 +9,7 @@ import { initPerfBackend } from './perf'
 import { findRelatedComponent } from './utils'
 import { stringify, classify, camelize, set, parse, getComponentName } from '../util'
 import ComponentSelector from './component-selector'
+import DocumentSelector from './document-selector'
 import SharedData, { init as initSharedData } from 'src/shared-data'
 
 // hook should have been injected before this executes.
@@ -46,7 +47,13 @@ function connect (Vue) {
     Vue
   })
 
+  bridge.on('switch-document', id => {
+    documentSelector.setCurrentDocumentById(id)
+    scan(documentSelector.getCurrentDocument())
+  })
+
   hook.currentTab = 'components'
+
   bridge.on('switch-tab', tab => {
     hook.currentTab = tab
     if (tab === 'components') {
@@ -82,11 +89,16 @@ function connect (Vue) {
     flush()
   })
 
-  bridge.on('refresh', scan)
+  bridge.on('refresh', () => {
+    scan(documentSelector.getCurrentDocument())
+  })
 
   bridge.on('enter-instance', id => highlight(findInstanceOrVnode(id)))
 
   bridge.on('leave-instance', unHighlight)
+
+  // eslint-disable-next-line no-new
+  const documentSelector = new DocumentSelector(bridge)
 
   // eslint-disable-next-line no-new
   new ComponentSelector(bridge, instanceMap)
@@ -151,7 +163,8 @@ function connect (Vue) {
   )
 
   setTimeout(() => {
-    scan()
+    documentSelector.scanForDocuments();
+    scan(documentSelector.getCurrentDocument())
 
     // perf
     initPerfBackend(Vue, bridge, instanceMap)
@@ -171,12 +184,12 @@ export function findInstanceOrVnode (id) {
  * Scan the page for root level Vue instances.
  */
 
-function scan () {
+function scan (doc) {
   rootInstances.length = 0
   let inFragment = false
   let currentFragment = null
 
-  walk(document, function (node) {
+  walk(doc, function (node) {
     if (inFragment) {
       if (node === currentFragment._fragmentEnd) {
         inFragment = false

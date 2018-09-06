@@ -41,13 +41,13 @@ export default class DocumentSelector {
 
     this.availableDocuments = this.availableDocuments.concat(newDocuments)
 
-    const transportableDocuments = this.availableDocuments.map(document => {
+    const transportableWrappers = this.availableDocuments.map(document => {
       return {
         id : document.__VUE_DEVTOOLS_DOCUMENT_ID__,
         url: document.location.href
       }
     })
 
-    this.bridge.send('documents:update', transportableDocuments)
+    this.bridge.send('documents:update', transportableWrappers)
   }
 }
